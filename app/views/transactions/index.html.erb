@@ -2,7 +2,8 @@
 
 <!-- Step 1: List all transaction, starting with the ICO -->
 <%transaction = Transaction.all%>
-<ul>
+<ol>
+
     <%for user_send in transaction
         if user_send.from_user == nil%>
         <li>Initial coin offering: <%= user_send.amount%> to <%= user_send.to_user.name%> </li>
@@ -10,47 +11,25 @@
         <li><%= user_send.amount%>KC from <%= user_send.from_user.name %> to <%= user_send.to_user.name%> </li>
         <%end
     end%>
-<ul>
+
+</ol>
 
 <!-- Step 2: Calculate and display the balances -->
 
 <h1>KelloggCoin User Balances</h1>
 
+
 <%user = User.all%>
-<%user_balance = Array.new(User.all.count,0)%>
-
-<%for tally in transaction
-  i = -1
-  j = -1
-  for sender in user
-    i = i + 1%>%
-    <h1><%=sender.name%><h1>
-    <%if tally.from_user.name == sender.name
-      user_balance[i]
-      user_balance[i] = user_balance[i] - tally.amount
-    elsif tally.from_user == nil
-      # Do nothing 
-    end
-  end
-
-  for receiver in user
-    j = j + 1
-    if tally.from_user.name == nil && tally.to_user.name == receiver.name
-      user_balance[j]
-      user_balance[j] = user_balance[j] + tally.amount
-    elsif tally.to_user.name == receiver.name
-      user_balance[j]
-      user_balance[j] = user_balance[j] + tally.amount
-    end
-  end
-end%>
-
 <ul>
-    <%for person in user
-    k=k+1%>
-    <li>Balance for <%=person.name%> is <%=user_balance[k]%>
-    <%end%>
-<ul>
+  <% for person in user %>
+    <% 
+      user_balance = 0
+      user_balance = user_balance + Transaction.where({ to_user_id: person.id }).sum(:amount)
+      user_balance = user_balance - Transaction.where({ from_user_id: person.id }).sum(:amount)
+    %>
+    <li>Balance for <%= person.name %> is <%= user_balance %> KC</li>
+  <% end %>
+</ul>
 
 <!-- 
 Expected balances:
